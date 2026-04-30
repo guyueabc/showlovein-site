@@ -184,20 +184,26 @@ function generateTotpSecret() {
 
 // ===== LOGIN FLOW =====
 async function attemptLogin() {
+    console.log('[admin] Login attempt started');
     const errEl = $('#login-error');
     errEl.classList.add('hidden');
 
     if (isLockedOut()) {
         const remaining = Math.ceil((getLockout().lockedUntil - Date.now()) / 60000);
-        showLockout(`Account locked. Try again in ${remaining} minutes.`);
+        console.warn('[admin] Locked out for', remaining, 'minutes');
+        showLockout(`Account locked. Try again in ${remaining} minutes. (Open DevTools Console and run: localStorage.removeItem("admin_lockout") to reset)`);
         return;
     }
 
     const email = $('#email').value.trim().toLowerCase();
     const password = $('#password').value;
     const otp = $('#otp').value.trim();
+    console.log('[admin] Email:', email, '| Password length:', password.length, '| OTP:', otp || '(empty)');
 
-    if (!email || !password) return;
+    if (!email || !password) {
+        showLoginError('Email and password required.');
+        return;
+    }
 
     const btn = $('#login-btn');
     btn.disabled = true;
@@ -208,20 +214,25 @@ async function attemptLogin() {
 
     // Check email
     if (email !== ADMIN_CONFIG.email.toLowerCase()) {
+        console.warn('[admin] Email mismatch. Got:', email, 'Expected:', ADMIN_CONFIG.email.toLowerCase());
         recordFailedAttempt();
         audit('login_failed', { reason: 'wrong_email', email });
-        showLoginError('Invalid credentials.');
+        showLoginError('Invalid credentials. (email mismatch — check DevTools console)');
         resetBtn();
         return;
     }
 
     // Check password
     const inputHash = await deriveHash(password);
+    console.log('[admin] Computed hash:', inputHash);
+    console.log('[admin] Stored hash:  ', ADMIN_CONFIG.passwordHash);
+    console.log('[admin] Match:', inputHash === ADMIN_CONFIG.passwordHash);
+
     if (inputHash !== ADMIN_CONFIG.passwordHash) {
         const l = recordFailedAttempt();
         audit('login_failed', { reason: 'wrong_password', attempts: l.attempts });
         const remaining = ADMIN_CONFIG.maxLoginAttempts - l.attempts;
-        showLoginError(`Invalid credentials. ${remaining} attempts remaining.`);
+        showLoginError(`Invalid credentials. ${remaining} attempts remaining. (check DevTools console for hash debug)`);
         resetBtn();
         return;
     }
@@ -593,6 +604,9 @@ function showAuditLog() {
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('[admin] admin.js loaded. Version: 2026-04-30-v2');
+    console.log('[admin] If you cannot login, run in console: localStorage.clear() and refresh');
+
     // Track this page view locally
     const pv = JSON.parse(localStorage.getItem('local_pageviews') || '{}');
     pv[location.pathname] = (pv[location.pathname] || 0) + 1;
@@ -600,6 +614,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Check session
     if (getSession()) {
+        console.log('[admin] Existing session found, entering panel');
         showAdminPanel();
         return;
     }
@@ -607,7 +622,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show login
     if (isLockedOut()) {
         const remaining = Math.ceil((getLockout().lockedUntil - Date.now()) / 60000);
-        showLockout(`Too many failed attempts. Locked for ${remaining} more minutes.`);
+        console.warn('[admin] Account locked for', remaining, 'minutes');
+        showLockout(`Too many failed attempts. Locked for ${remaining} more minutes. (Run localStorage.removeItem("admin_lockout") in console to reset)`);
         $('#login-btn').disabled = true;
     }
 
