@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product | Showlovein</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;600&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+        .text-gold { color: #D4AF37; }
+        .bg-gold { background-color: #D4AF37; }
+        .border-gold { border-color: #D4AF37; }
+        .variant-btn { transition: all 0.2s; }
+        .variant-btn.active { background: #D4AF37; color: white; border-color: #D4AF37; }
+        .whatsapp-float { position: fixed; bottom: 90px; right: 20px; z-index: 40; }
+    </style>
+    <script src="products.js"></script>
+</head>
+<body class="bg-white">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md border-b border-pink-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <a href="index.html" class="text-2xl font-bold tracking-tighter text-gray-900">SHOW<span class="text-gold">LOVEIN</span></a>
+                <div class="hidden md:flex space-x-8">
+                    <a href="index.html" class="text-gray-600 hover:text-gold text-sm">Home</a>
+                    <a href="index.html#products" class="text-gray-600 hover:text-gold text-sm">Shop</a>
+                    <a href="index.html#about" class="text-gray-600 hover:text-gold text-sm">About</a>
+                    <a href="index.html#contact" class="text-gray-600 hover:text-gold text-sm">Contact</a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="login.html" id="login-link" class="text-gray-600 hover:text-gold flex items-center gap-2 text-sm">
+                        <i class="fas fa-user"></i><span class="hidden md:inline">Sign In</span>
+                    </a>
+                    <div id="user-menu" style="display:none" class="items-center gap-2">
+                        <span class="text-sm text-gray-700"><i class="fas fa-user-circle text-gold"></i> <span id="user-name"></span></span>
+                        <button onclick="Auth.logout()" class="text-xs text-gray-400 hover:text-red-500">Logout</button>
+                    </div>
+                    <a href="cart.html" class="relative text-gray-600 hover:text-gold">
+                        <i class="fas fa-shopping-bag text-xl"></i>
+                        <span id="cart-badge" class="absolute -top-2 -right-2 bg-gold text-white text-xs w-5 h-5 rounded-full flex items-center justify-center" style="display:none">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-28 pb-20">
+        <div class="max-w-6xl mx-auto px-4">
+            <!-- Breadcrumb -->
+            <nav class="text-sm text-gray-500 mb-6">
+                <a href="index.html" class="hover:text-gold">Home</a> /
+                <a href="index.html#products" class="hover:text-gold">Shop</a> /
+                <span id="bc-title" class="text-gray-900"></span>
+            </nav>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <!-- Image -->
+                <div>
+                    <div class="aspect-square bg-gray-100 rounded-2xl overflow-hidden">
+                        <img id="prod-image" src="" alt="" class="w-full h-full object-cover">
+                    </div>
+                </div>
+                <!-- Info -->
+                <div>
+                    <p class="text-sm text-gold uppercase tracking-widest mb-2" id="prod-category"></p>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-4" id="prod-title"></h1>
+                    <p class="text-2xl text-gold font-bold mb-6" id="prod-price"></p>
+                    <p class="text-gray-600 mb-8 leading-relaxed" id="prod-description"></p>
+
+                    <!-- Features -->
+                    <div class="mb-8">
+                        <h3 class="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Key Features</h3>
+                        <ul id="prod-features" class="space-y-2"></ul>
+                    </div>
+
+                    <!-- Variants -->
+                    <div id="prod-variants" class="space-y-4 mb-8"></div>
+
+                    <!-- Quantity -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Quantity</label>
+                        <div class="flex items-center gap-3">
+                            <button onclick="changeQty(-1)" class="w-10 h-10 border rounded-lg hover:bg-gray-50">-</button>
+                            <input id="qty" type="number" value="1" min="1" class="w-20 text-center border rounded-lg py-2">
+                            <button onclick="changeQty(1)" class="w-10 h-10 border rounded-lg hover:bg-gray-50">+</button>
+                            <span class="text-sm text-gray-500 ml-2">MOQ: 1 unit</span>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex gap-3">
+                        <button onclick="addToCart()" class="flex-1 bg-gray-900 text-white py-4 rounded-xl font-semibold hover:bg-black transition flex items-center justify-center gap-2">
+                            <i class="fas fa-shopping-bag"></i> Add to Cart
+                        </button>
+                        <button onclick="buyNow()" class="flex-1 bg-gold text-white py-4 rounded-xl font-semibold hover:bg-yellow-600 transition">
+                            Buy Now
+                        </button>
+                    </div>
+
+                    <!-- Trust badges -->
+                    <div class="mt-8 grid grid-cols-3 gap-4 text-center text-sm">
+                        <div><i class="fas fa-shipping-fast text-gold mb-1"></i><p class="text-gray-600">Worldwide Shipping</p></div>
+                        <div><i class="fas fa-shield-alt text-gold mb-1"></i><p class="text-gray-600">Quality Guarantee</p></div>
+                        <div><i class="fas fa-headset text-gold mb-1"></i><p class="text-gray-600">24/7 Support</p></div>
+                    </div>
+
+                    <!-- Contact -->
+                    <div class="mt-8 p-4 bg-pink-50 rounded-xl">
+                        <p class="text-sm text-gray-700 mb-2">Have questions about this product?</p>
+                        <div class="flex gap-2">
+                            <a href="https://wa.me/8615376427736" target="_blank" class="flex-1 bg-green-500 text-white py-2 rounded-lg text-sm text-center hover:bg-green-600"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                            <a href="mailto:eyelash@showlovein.com" class="flex-1 bg-blue-500 text-white py-2 rounded-lg text-sm text-center hover:bg-blue-600"><i class="fas fa-envelope"></i> Email Us</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- WhatsApp Float -->
+    <a href="https://wa.me/8615376427736" target="_blank" class="whatsapp-float w-14 h-14 bg-green-500 rounded-full flex items-center justify-center text-white shadow-2xl hover:bg-green-600">
+        <i class="fab fa-whatsapp text-2xl"></i>
+    </a>
+
+    <!-- Tawk.to Live Chat -->
+    <script type="text/javascript">
+    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    (function(){var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];s1.async=true;s1.src='https://embed.tawk.to/65f4a8b0a0c6737bd1303f93/1hp08fhgg';s1.charset='UTF-8';s1.setAttribute('crossorigin','*');s0.parentNode.insertBefore(s1,s0);})();
+    </script>
+
+    <script>
+        const params = new URLSearchParams(location.search);
+        const productId = params.get('id');
+        const product = PRODUCTS.find(p => p.id === productId);
+        const selectedVariants = {};
+
+        if (!product) {
+            document.querySelector('main').innerHTML = '<div class="max-w-4xl mx-auto px-4 py-20 text-center"><h1 class="text-3xl font-bold mb-4">Product Not Found</h1><a href="index.html" class="text-gold underline">Back to home</a></div>';
+        } else {
+            document.title = product.short + ' | Showlovein';
+            document.getElementById('bc-title').textContent = product.short;
+            document.getElementById('prod-image').src = product.image;
+            document.getElementById('prod-image').alt = product.short;
+            document.getElementById('prod-category').textContent = product.category;
+            document.getElementById('prod-title').textContent = product.title;
+            document.getElementById('prod-price').textContent = `$${product.price.toFixed(2)} - $${product.price_max.toFixed(2)}`;
+            document.getElementById('prod-description').textContent = product.description;
+
+            // Features
+            document.getElementById('prod-features').innerHTML = product.features.map(f => `
+                <li class="flex items-center gap-2 text-sm text-gray-700"><i class="fas fa-check text-gold"></i> ${f}</li>
+            `).join('');
+
+            // Variants
+            const variantHtml = Object.entries(product.variants).map(([name, options]) => {
+                selectedVariants[name] = options[0];
+                return `
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">${name}: <span class="text-gray-500" id="sel-${name}">${options[0]}</span></label>
+                        <div class="flex flex-wrap gap-2">
+                            ${options.map((opt, i) => `
+                                <button onclick="selectVariant('${name}', '${opt}', this)" class="variant-btn px-4 py-2 border rounded-lg text-sm hover:border-gold ${i === 0 ? 'active' : ''}">${opt}</button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('prod-variants').innerHTML = variantHtml;
+        }
+
+        function selectVariant(name, value, btn) {
+            selectedVariants[name] = value;
+            document.getElementById('sel-' + name).textContent = value;
+            const siblings = btn.parentElement.querySelectorAll('.variant-btn');
+            siblings.forEach(s => s.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function changeQty(delta) {
+            const input = document.getElementById('qty');
+            const val = Math.max(1, parseInt(input.value) + delta);
+            input.value = val;
+        }
+
+        function addToCart() {
+            const qty = parseInt(document.getElementById('qty').value);
+            Cart.add(product.id, selectedVariants, qty);
+            // Show toast
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-24 right-6 bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl z-50';
+            toast.innerHTML = '<i class="fas fa-check-circle"></i> Added to cart!';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+
+        function buyNow() {
+            addToCart();
+            setTimeout(() => location.href = 'cart.html', 500);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            Cart.updateBadge();
+            Auth.updateUI();
+        });
+    </script>
+</body>
+</html>

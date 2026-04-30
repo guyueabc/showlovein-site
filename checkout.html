@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | Showlovein</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .text-gold { color: #D4AF37; }
+        .bg-gold { background-color: #D4AF37; }
+    </style>
+    <script src="products.js"></script>
+    <!-- PayPal SDK -->
+    <script src="https://www.paypal.com/sdk/js?client-id=AbRagU3CMZnBsmmwQOEV6XhSNIGRqoSQeeIRJgbTeGVBx0bR_-qf9jLmG8y9KicplNDqZYwD69Fpuyk7&currency=USD&intent=capture"></script>
+</head>
+<body class="bg-gray-50">
+
+    <nav class="fixed w-full z-50 bg-white border-b border-pink-100">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-20 items-center">
+                <a href="index.html" class="text-2xl font-bold tracking-tighter text-gray-900">SHOW<span class="text-gold">LOVEIN</span></a>
+                <div class="flex items-center gap-4 text-sm">
+                    <span class="text-gray-500"><i class="fas fa-lock text-green-500"></i> Secure Checkout</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-28 pb-20">
+        <div class="max-w-6xl mx-auto px-4">
+            <h1 class="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Shipping form -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm">
+                        <h2 class="text-xl font-bold text-gray-900 mb-6">Shipping Information</h2>
+                        <form id="shipping-form" class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                                    <input type="email" id="email" required class="w-full border rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-gold outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
+                                    <input type="tel" id="phone" required class="w-full border rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-gold outline-none">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                                    <input type="text" id="firstname" required class="w-full border rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-gold outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                                    <input type="text" id="lastname" required class="w-full border rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-gold outline-none">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+                                <input type="text" id="address" required class="w-full border rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-gold outline-none">
+                            </div>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">City *</label>
+                                    <input type="text" id="city" required class="w-full border rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-gold outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">State/Province</label>
+                                    <input type="text" id="state" class="w-full border rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-gold outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">ZIP Code *</label>
+                                    <input type="text" id="zip" required class="w-full border rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-gold outline-none">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Country *</label>
+                                <select id="country" required class="w-full border rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-gold outline-none">
+                                    <option value="">Select country</option>
+                                    <option value="US">United States</option>
+                                    <option value="UK">United Kingdom</option>
+                                    <option value="CA">Canada</option>
+                                    <option value="AU">Australia</option>
+                                    <option value="DE">Germany</option>
+                                    <option value="FR">France</option>
+                                    <option value="JP">Japan</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Payment -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm">
+                        <h2 class="text-xl font-bold text-gray-900 mb-2">Payment Method</h2>
+                        <p class="text-sm text-gray-500 mb-6">All payments are secured by PayPal. You can pay with PayPal balance, credit/debit card, or local methods.</p>
+                        <div id="paypal-button-container"></div>
+                        <div id="payment-message" class="mt-4 text-sm"></div>
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="bg-white rounded-2xl p-6 h-fit shadow-sm">
+                    <h2 class="text-xl font-bold text-gray-900 mb-6">Order Summary</h2>
+                    <div id="order-items" class="space-y-3 mb-6 max-h-80 overflow-y-auto"></div>
+                    <div class="border-t pt-4 space-y-2">
+                        <div class="flex justify-between text-gray-600 text-sm"><span>Subtotal</span><span id="ck-subtotal">$0.00</span></div>
+                        <div class="flex justify-between text-gray-600 text-sm"><span>Shipping (DHL Express)</span><span id="ck-shipping">$15.00</span></div>
+                        <div class="border-t pt-2 flex justify-between text-lg font-bold text-gray-900"><span>Total</span><span id="ck-total">$0.00</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let totalAmount = 0;
+        const SHIPPING = 15.00;
+
+        function renderOrder() {
+            const cart = Cart.get();
+            if (cart.length === 0) {
+                location.href = 'cart.html';
+                return;
+            }
+            const itemsEl = document.getElementById('order-items');
+            itemsEl.innerHTML = cart.map(item => {
+                const p = PRODUCTS.find(x => x.id === item.productId);
+                if (!p) return '';
+                return `
+                    <div class="flex gap-3">
+                        <img src="${p.image}" class="w-14 h-14 object-cover rounded-lg">
+                        <div class="flex-1 text-sm">
+                            <p class="font-medium text-gray-900 line-clamp-1">${p.short}</p>
+                            <p class="text-xs text-gray-500">Qty: ${item.qty}</p>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-900">$${(p.price * item.qty).toFixed(2)}</span>
+                    </div>
+                `;
+            }).join('');
+
+            const subtotal = Cart.getTotal();
+            totalAmount = subtotal + SHIPPING;
+            document.getElementById('ck-subtotal').textContent = '$' + subtotal.toFixed(2);
+            document.getElementById('ck-total').textContent = '$' + totalAmount.toFixed(2);
+        }
+
+        function getShippingInfo() {
+            return {
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                name: document.getElementById('firstname').value + ' ' + document.getElementById('lastname').value,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                state: document.getElementById('state').value,
+                zip: document.getElementById('zip').value,
+                country: document.getElementById('country').value
+            };
+        }
+
+        function validateShipping() {
+            const required = ['email','phone','firstname','lastname','address','city','zip','country'];
+            for (const id of required) {
+                const v = document.getElementById(id).value.trim();
+                if (!v) {
+                    document.getElementById(id).focus();
+                    document.getElementById('payment-message').innerHTML = '<span class="text-red-500"><i class="fas fa-exclamation-circle"></i> Please complete all required shipping fields.</span>';
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // PayPal Buttons
+        paypal.Buttons({
+            style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal', height: 50 },
+            onClick: (data, actions) => {
+                if (!validateShipping()) return actions.reject();
+                return actions.resolve();
+            },
+            createOrder: (data, actions) => {
+                const ship = getShippingInfo();
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: totalAmount.toFixed(2),
+                            currency_code: 'USD',
+                            breakdown: {
+                                item_total: { value: Cart.getTotal().toFixed(2), currency_code: 'USD' },
+                                shipping: { value: SHIPPING.toFixed(2), currency_code: 'USD' }
+                            }
+                        },
+                        items: Cart.get().map(item => {
+                            const p = PRODUCTS.find(x => x.id === item.productId);
+                            return {
+                                name: p.short.substring(0, 127),
+                                quantity: item.qty.toString(),
+                                unit_amount: { value: p.price.toFixed(2), currency_code: 'USD' },
+                                sku: p.id
+                            };
+                        }),
+                        shipping: {
+                            name: { full_name: ship.name },
+                            address: {
+                                address_line_1: ship.address,
+                                admin_area_2: ship.city,
+                                admin_area_1: ship.state,
+                                postal_code: ship.zip,
+                                country_code: ship.country
+                            }
+                        }
+                    }]
+                });
+            },
+            onApprove: (data, actions) => {
+                return actions.order.capture().then(details => {
+                    const orderId = details.id;
+                    const ship = getShippingInfo();
+                    // Save order to localStorage for confirmation page
+                    localStorage.setItem('lastOrder', JSON.stringify({
+                        orderId, details, shipping: ship, items: Cart.get(), total: totalAmount, date: new Date().toISOString()
+                    }));
+                    Cart.clear();
+                    location.href = 'success.html?order=' + orderId;
+                });
+            },
+            onError: (err) => {
+                document.getElementById('payment-message').innerHTML = '<span class="text-red-500"><i class="fas fa-exclamation-circle"></i> Payment error: ' + err.message + '</span>';
+            },
+            onCancel: () => {
+                document.getElementById('payment-message').innerHTML = '<span class="text-yellow-600"><i class="fas fa-info-circle"></i> Payment cancelled.</span>';
+            }
+        }).render('#paypal-button-container');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderOrder();
+            // Pre-fill from logged-in user
+            const user = Auth.getUser();
+            if (user) {
+                if (user.email) document.getElementById('email').value = user.email;
+                if (user.name) {
+                    const parts = user.name.split(' ');
+                    document.getElementById('firstname').value = parts[0] || '';
+                    document.getElementById('lastname').value = parts.slice(1).join(' ') || '';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

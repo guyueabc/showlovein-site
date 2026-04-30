@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In | Showlovein</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .text-gold { color: #D4AF37; }
+        .bg-gold { background-color: #D4AF37; }
+        .bg-pink-soft { background-color: #FFF5F7; }
+    </style>
+    <script src="products.js"></script>
+</head>
+<body class="bg-pink-soft min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full">
+        <div class="text-center mb-8">
+            <a href="index.html" class="text-3xl font-bold tracking-tighter text-gray-900">SHOW<span class="text-gold">LOVEIN</span></a>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-xl p-8">
+            <h1 class="text-2xl font-bold text-gray-900 mb-2 text-center" id="form-title">Welcome Back</h1>
+            <p class="text-gray-500 text-center mb-8 text-sm" id="form-subtitle">Sign in to continue shopping</p>
+
+            <!-- Social Login -->
+            <div class="space-y-3 mb-6">
+                <button onclick="socialLogin('Google')" class="w-full border border-gray-300 hover:border-gold py-3 rounded-xl flex items-center justify-center gap-3 font-medium text-gray-700 transition">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                    Continue with Google
+                </button>
+                <button onclick="socialLogin('Facebook')" class="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white py-3 rounded-xl flex items-center justify-center gap-3 font-medium transition">
+                    <i class="fab fa-facebook-f"></i>
+                    Continue with Facebook
+                </button>
+                <button onclick="socialLogin('Apple')" class="w-full bg-black hover:bg-gray-800 text-white py-3 rounded-xl flex items-center justify-center gap-3 font-medium transition">
+                    <i class="fab fa-apple"></i>
+                    Continue with Apple
+                </button>
+            </div>
+
+            <div class="flex items-center my-6">
+                <div class="flex-1 border-t"></div>
+                <span class="px-4 text-xs text-gray-400">OR</span>
+                <div class="flex-1 border-t"></div>
+            </div>
+
+            <!-- Email/Password Form -->
+            <form id="email-form" class="space-y-4">
+                <div id="name-field" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                    <input type="text" id="name" class="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-gold outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="email" required class="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-gold outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="password" required minlength="6" class="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-gold outline-none">
+                </div>
+                <button type="submit" class="w-full bg-gold hover:bg-yellow-600 text-white py-3 rounded-xl font-semibold transition" id="submit-btn">Sign In</button>
+            </form>
+
+            <p class="text-center text-sm text-gray-500 mt-6">
+                <span id="toggle-text">Don't have an account?</span>
+                <button onclick="toggleMode()" class="text-gold font-semibold hover:underline" id="toggle-btn">Sign Up</button>
+            </p>
+        </div>
+
+        <p class="text-center text-xs text-gray-400 mt-6">
+            <a href="index.html" class="hover:text-gold"><i class="fas fa-arrow-left"></i> Back to home</a>
+        </p>
+    </div>
+
+    <script>
+        let isSignUp = false;
+
+        function toggleMode() {
+            isSignUp = !isSignUp;
+            document.getElementById('form-title').textContent = isSignUp ? 'Create Account' : 'Welcome Back';
+            document.getElementById('form-subtitle').textContent = isSignUp ? 'Join Showlovein today' : 'Sign in to continue shopping';
+            document.getElementById('submit-btn').textContent = isSignUp ? 'Create Account' : 'Sign In';
+            document.getElementById('toggle-text').textContent = isSignUp ? 'Already have an account?' : "Don't have an account?";
+            document.getElementById('toggle-btn').textContent = isSignUp ? 'Sign In' : 'Sign Up';
+            document.getElementById('name-field').classList.toggle('hidden', !isSignUp);
+        }
+
+        function socialLogin(provider) {
+            // Demo: simulated social login. In production, integrate Firebase Auth or platform SDK.
+            const name = prompt(`Sign in with ${provider}\n\nEnter your name (demo mode):`);
+            if (!name) return;
+            const email = prompt('Enter your email:');
+            if (!email) return;
+            Auth.setUser({ name, email, provider, loginAt: new Date().toISOString() });
+            location.href = 'index.html';
+        }
+
+        document.getElementById('email-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const name = isSignUp ? document.getElementById('name').value : email.split('@')[0];
+            // Demo: client-side auth (replace with Firebase Auth or backend)
+            Auth.setUser({ name, email, provider: 'Email', loginAt: new Date().toISOString() });
+            location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>

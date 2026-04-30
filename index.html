@@ -7,46 +7,37 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-XZSET6G964');
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Showlovein | Premium Eyelash Extensions & Tools</title>
-    <meta name="description" content="Showlovein (Qingdao Dingjutianxia) is a professional manufacturer of premium eyelash extensions, clover lashes, cashmere volume lashes, and salon-grade tools. Worldwide wholesale and private label services.">
+    <title>Showlovein | Premium Eyelash Extensions & Tools | Buy Online</title>
+    <meta name="description" content="Buy premium eyelash extensions, clover lashes, cashmere volume lashes, and salon-grade tools online. Worldwide shipping. Wholesale & private label available.">
     <meta name="keywords" content="eyelash extensions, clover lashes, cashmere lashes, volume lashes, lash glue, lash shampoo, eyelash factory, wholesale eyelashes, private label, Showlovein">
     <meta property="og:title" content="Showlovein | Premium Eyelash Extensions & Tools">
     <meta property="og:description" content="Enhance your natural beauty with professional-grade eyelash products. Trusted by artists worldwide.">
-    <meta property="og:image" content="https://sc04.alicdn.com/kf/Hdbbb6a106e8d4515be692063768d8fd4J.png">
+    <meta property="og:image" content="images/hero.jpg">
     <meta property="og:url" content="https://www.showlovein.com">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;600&display=swap');
-        
         body { font-family: 'Inter', sans-serif; }
         h1, h2, h3 { font-family: 'Playfair Display', serif; }
-        
         .bg-pink-soft { background-color: #FFF5F7; }
         .text-gold { color: #D4AF37; }
         .bg-gold { background-color: #D4AF37; }
-        
         .product-card:hover .product-overlay { opacity: 1; }
-        .nav-link:after {
-            content: '';
-            display: block;
-            width: 0;
-            height: 2px;
-            background: #D4AF37;
-            transition: width .3s;
-        }
+        .nav-link:after { content: ''; display: block; width: 0; height: 2px; background: #D4AF37; transition: width .3s; }
         .nav-link:hover:after { width: 100%; }
-        
         .hero-gradient {
-            background: linear-gradient(rgba(255, 245, 247, 0.8), rgba(255, 245, 247, 0.8)), 
-                        url('https://sc02.alicdn.com/kf/Hdbbb6a106e8d4515be692063768d8fd4J.png') center/cover;
+            background: linear-gradient(rgba(255, 245, 247, 0.7), rgba(255, 245, 247, 0.7)),
+                        url('images/hero.jpg') center/cover;
         }
+        .modal-backdrop { background: rgba(0,0,0,0.5); }
+        .whatsapp-float { position: fixed; bottom: 90px; right: 20px; z-index: 40; }
     </style>
+    <script src="products.js"></script>
 </head>
 <body class="bg-white">
 
@@ -54,18 +45,28 @@
     <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md border-b border-pink-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
-                <div class="flex-shrink-0 flex items-center">
+                <a href="index.html" class="flex-shrink-0 flex items-center">
                     <span class="text-2xl font-bold tracking-tighter text-gray-900">SHOW<span class="text-gold">LOVEIN</span></span>
-                </div>
+                </a>
                 <div class="hidden md:flex space-x-8">
-                    <a href="#home" class="nav-link text-gray-600 hover:text-gold px-3 py-2 text-sm font-medium">Home</a>
+                    <a href="index.html" class="nav-link text-gray-600 hover:text-gold px-3 py-2 text-sm font-medium">Home</a>
                     <a href="#categories" class="nav-link text-gray-600 hover:text-gold px-3 py-2 text-sm font-medium">Categories</a>
-                    <a href="#products" class="nav-link text-gray-600 hover:text-gold px-3 py-2 text-sm font-medium">Products</a>
+                    <a href="#products" class="nav-link text-gray-600 hover:text-gold px-3 py-2 text-sm font-medium">Shop</a>
                     <a href="#about" class="nav-link text-gray-600 hover:text-gold px-3 py-2 text-sm font-medium">About</a>
                     <a href="#contact" class="nav-link text-gray-600 hover:text-gold px-3 py-2 text-sm font-medium">Contact</a>
                 </div>
-                <div class="md:hidden">
-                    <button class="text-gray-600"><i class="fas fa-bars text-xl"></i></button>
+                <div class="flex items-center gap-4">
+                    <a href="login.html" id="login-link" class="text-gray-600 hover:text-gold flex items-center gap-2 text-sm">
+                        <i class="fas fa-user"></i> <span class="hidden md:inline">Sign In</span>
+                    </a>
+                    <div id="user-menu" style="display:none" class="items-center gap-2">
+                        <span class="text-sm text-gray-700"><i class="fas fa-user-circle text-gold"></i> <span id="user-name"></span></span>
+                        <button onclick="Auth.logout()" class="text-xs text-gray-400 hover:text-red-500">Logout</button>
+                    </div>
+                    <a href="cart.html" class="relative text-gray-600 hover:text-gold">
+                        <i class="fas fa-shopping-bag text-xl"></i>
+                        <span id="cart-badge" class="absolute -top-2 -right-2 bg-gold text-white text-xs w-5 h-5 rounded-full flex items-center justify-center" style="display:none">0</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -78,11 +79,11 @@
                 Enhance Your Natural <br><span class="text-gold italic">Beauty with Confidence</span>
             </h1>
             <p class="text-lg text-gray-600 mb-10 max-w-2xl mx-auto">
-                Premium eyelash extensions, professional glues, and salon-grade tools. Quality trusted by 10,000+ lash artists worldwide.
+                Premium eyelash extensions, professional glues, and salon-grade tools. Shop directly from the manufacturer with worldwide shipping.
             </p>
             <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <a href="#products" class="bg-gray-900 text-white px-8 py-4 rounded-full font-semibold hover:bg-black transition transform hover:-translate-y-1">View Collection</a>
-                <a href="#contact" class="bg-white border-2 border-gold text-gold px-8 py-4 rounded-full font-semibold hover:bg-pink-soft transition">Custom Inquiries</a>
+                <a href="#products" class="bg-gray-900 text-white px-8 py-4 rounded-full font-semibold hover:bg-black transition transform hover:-translate-y-1">Shop Now</a>
+                <a href="#contact" class="bg-white border-2 border-gold text-gold px-8 py-4 rounded-full font-semibold hover:bg-pink-soft transition">Wholesale Inquiry</a>
             </div>
         </div>
     </section>
@@ -95,30 +96,30 @@
                 <div class="h-1 w-20 bg-gold mx-auto"></div>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition text-center group">
+                <a href="#products" class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition text-center group">
                     <div class="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-gold transition">
                         <i class="fas fa-eye text-gold group-hover:text-white"></i>
                     </div>
                     <h3 class="font-semibold text-gray-900">Eyelash Extensions</h3>
-                </div>
-                <div class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition text-center group">
+                </a>
+                <a href="#products" class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition text-center group">
                     <div class="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-gold transition">
                         <i class="fas fa-magic text-gold group-hover:text-white"></i>
                     </div>
                     <h3 class="font-semibold text-gray-900">Premade Fans</h3>
-                </div>
-                <div class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition text-center group">
+                </a>
+                <a href="#products" class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition text-center group">
                     <div class="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-gold transition">
                         <i class="fas fa-vial text-gold group-hover:text-white"></i>
                     </div>
-                    <h3 class="font-semibold text-gray-900">Glue & Care</h3>
-                </div>
-                <div class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition text-center group">
+                    <h3 class="font-semibold text-gray-900">Lash Care</h3>
+                </a>
+                <a href="#products" class="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition text-center group">
                     <div class="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-gold transition">
                         <i class="fas fa-tools text-gold group-hover:text-white"></i>
                     </div>
                     <h3 class="font-semibold text-gray-900">Lash Tools</h3>
-                </div>
+                </a>
             </div>
         </div>
     </section>
@@ -128,64 +129,12 @@
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-end mb-16">
                 <div>
-                    <h2 class="text-4xl font-bold text-gray-900 mb-4">Hot Sale Products</h2>
-                    <p class="text-gray-600">Our most popular items chosen by professionals.</p>
+                    <h2 class="text-4xl font-bold text-gray-900 mb-4">Featured Products</h2>
+                    <p class="text-gray-600">Shop our bestsellers — direct from manufacturer.</p>
                 </div>
-                <a href="#" class="text-gold font-semibold hover:underline">View All Products <i class="fas fa-arrow-right ml-2"></i></a>
             </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Product 1 -->
-                <div class="product-card group relative">
-                    <div class="aspect-square bg-gray-100 rounded-2xl overflow-hidden mb-4 relative">
-                        <img src="https://sc02.alicdn.com/kf/Hdbbb6a106e8d4515be692063768d8fd4J.png" alt="0.07mm Clover Lashes" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
-                        <div class="product-overlay absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 transition duration-300">
-                            <a href="https://showlovein.en.alibaba.com/product/1600542328335-900508055/0_07mm_3D_4D_5D_Clover_Lashes_Crisscross_Custom_Logo_Auto_Fan_0_05mm_6D_7D_8D_W_Lashes_8_15mm_Brazilian_Volume_Lash_Extensions.html" target="_blank" class="bg-white text-gray-900 px-6 py-2 rounded-full font-semibold">Buy on Alibaba</a>
-                        </div>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-1 truncate">0.07mm 3D 4D 5D Clover Lashes Crisscross Brazilian Volume</h3>
-                    <p class="text-gold font-bold">$2.49 - $3.99</p>
-                    <p class="text-xs text-gray-400 mt-1 uppercase tracking-widest">Synthetic Hair | Brazilian Volume</p>
-                </div>
-
-                <!-- Product 2 -->
-                <div class="product-card group relative">
-                    <div class="aspect-square bg-gray-100 rounded-2xl overflow-hidden mb-4 relative">
-                        <img src="https://sc02.alicdn.com/kf/Hdbbb6a106e8d4515be692063768d8fd4J.png" alt="Cashmere Matte Lashes" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
-                        <div class="product-overlay absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 transition duration-300">
-                            <a href="https://showlovein.en.alibaba.com/product/1600539130768-900508055/Cashmere_Matte_Dark_Volume_Lashes_Extension_Tray_Soft_Fluffy_0_03_05_07mm_J_B_C_CC_D_DD_L_Vegan_Cashmere_Lash_Extensions.html" target="_blank" class="bg-white text-gray-900 px-6 py-2 rounded-full font-semibold">Buy on Alibaba</a>
-                        </div>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-1 truncate">Cashmere Matte Dark Volume Lashes Extension Tray Soft Fluffy</h3>
-                    <p class="text-gold font-bold">$1.59 - $2.29</p>
-                    <p class="text-xs text-gray-400 mt-1 uppercase tracking-widest">Matte Finish | Ultra Soft</p>
-                </div>
-
-                <!-- Product 3 -->
-                <div class="product-card group relative">
-                    <div class="aspect-square bg-gray-100 rounded-2xl overflow-hidden mb-4 relative">
-                        <img src="https://sc02.alicdn.com/kf/Hdbbb6a106e8d4515be692063768d8fd4J.png" alt="Lash Shampoo Kit" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
-                        <div class="product-overlay absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 transition duration-300">
-                            <a href="https://showlovein.en.alibaba.com/product/1600539130768-900508055/Luxury_Eyelash_Shampoo_Kit_for_Sensitive_Eyes_Vegan_Lash_Shampoo_Foam_Cleanser_Private_Label_Eyelash_Shampoo.html" target="_blank" class="bg-white text-gray-900 px-6 py-2 rounded-full font-semibold">Buy on Alibaba</a>
-                        </div>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-1 truncate">Luxury Eyelash Shampoo Kit for Sensitive Eyes Vegan Lash Shampoo</h3>
-                    <p class="text-gold font-bold">$2.39 - $3.99</p>
-                    <p class="text-xs text-gray-400 mt-1 uppercase tracking-widest">Sensitive Eyes | Deep Cleaning</p>
-                </div>
-
-                <!-- Product 4 -->
-                <div class="product-card group relative">
-                    <div class="aspect-square bg-gray-100 rounded-2xl overflow-hidden mb-4 relative">
-                        <img src="https://sc02.alicdn.com/kf/Hdbbb6a106e8d4515be692063768d8fd4J.png" alt="UV Glue Lamp" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
-                        <div class="product-overlay absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 transition duration-300">
-                            <a href="https://showlovein.en.alibaba.com/product/1601235654321-900508055/Professional_5W_White_Black_UV_Glue_Lamp_for_Lash_Extensions_UV_Glue_LED_Lamp_Light_Beauty_Salon.html" target="_blank" class="bg-white text-gray-900 px-6 py-2 rounded-full font-semibold">Buy on Alibaba</a>
-                        </div>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-1 truncate">Professional 5W UV Glue Lamp for Lash Extensions LED Light</h3>
-                    <p class="text-gold font-bold">$45.00 - $65.00</p>
-                    <p class="text-xs text-gray-400 mt-1 uppercase tracking-widest">Fast Curing | Salon Grade</p>
-                </div>
+            <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Products inserted by JS -->
             </div>
         </div>
     </section>
@@ -196,9 +145,8 @@
             <div class="flex flex-col md:flex-row items-center gap-16">
                 <div class="md:w-1/2 relative">
                     <div class="relative z-10 rounded-2xl overflow-hidden border-8 border-gold/20 shadow-2xl">
-                        <img src="https://sc02.alicdn.com/kf/Hdbbb6a106e8d4515be692063768d8fd4J.png" alt="Factory" class="w-full h-[500px] object-cover">
+                        <img src="images/p2.jpg" alt="Showlovein Factory" class="w-full h-[500px] object-cover">
                     </div>
-                    <div class="absolute -bottom-10 -right-10 w-64 h-64 bg-gold rounded-full blur-[100px] opacity-20"></div>
                 </div>
                 <div class="md:w-1/2">
                     <span class="text-gold font-semibold tracking-widest uppercase text-sm mb-4 block">Our Heritage</span>
@@ -216,7 +164,6 @@
                             <p class="text-gray-500 text-sm">Countries Exported</p>
                         </div>
                     </div>
-                    <a href="#contact" class="inline-flex items-center text-gold font-bold hover:gap-4 transition-all">Learn More About Our Factory <i class="fas fa-arrow-right ml-2"></i></a>
                 </div>
             </div>
         </div>
@@ -226,43 +173,51 @@
     <section id="contact" class="py-24">
         <div class="max-w-7xl mx-auto px-4">
             <div class="bg-pink-soft rounded-[3rem] p-12 md:p-20 relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-1/3 h-full opacity-10">
-                    <i class="fas fa-envelope text-[20rem] text-gold -mr-20 -mt-20"></i>
-                </div>
                 <div class="relative z-10 flex flex-col md:flex-row gap-16">
                     <div class="md:w-1/2">
                         <h2 class="text-4xl font-bold text-gray-900 mb-6">Let's Create Your <br>Private Label Brand</h2>
-                        <p class="text-gray-600 mb-10">Interested in wholesale or custom logo services? Fill out the form and our specialist will contact you within 24 hours.</p>
+                        <p class="text-gray-600 mb-10">Interested in wholesale or custom logo services? Contact us through your favorite channel.</p>
                         <div class="space-y-4">
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-gold shadow-sm">
                                     <i class="fas fa-phone"></i>
                                 </div>
-                                <span class="font-medium">+86 15376427736</span>
+                                <a href="tel:+8615376427736" class="font-medium hover:text-gold">+86 15376427736</a>
                             </div>
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-gold shadow-sm">
                                     <i class="fas fa-envelope"></i>
                                 </div>
-                                <span class="font-medium">eyelash@showlovein.com</span>
+                                <a href="mailto:eyelash@showlovein.com" class="font-medium hover:text-gold">eyelash@showlovein.com</a>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <a href="https://wa.me/8615376427736" target="_blank" class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white shadow-sm hover:bg-green-600">
+                                    <i class="fab fa-whatsapp text-xl"></i>
+                                </a>
+                                <a href="https://m.me/showlovein" target="_blank" class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-sm hover:bg-blue-700">
+                                    <i class="fab fa-facebook-messenger text-xl"></i>
+                                </a>
+                                <a href="https://www.instagram.com/showlovein" target="_blank" class="w-12 h-12 bg-pink-500 rounded-full flex items-center justify-center text-white shadow-sm hover:bg-pink-600">
+                                    <i class="fab fa-instagram text-xl"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
                     <div class="md:w-1/2 bg-white p-10 rounded-3xl shadow-xl">
-                        <form class="space-y-6">
+                        <form id="inquiry-form" class="space-y-6">
                             <div class="grid grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-                                    <input type="text" class="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-gold outline-none">
+                                    <input type="text" required class="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-gold outline-none">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
-                                    <input type="email" class="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-gold outline-none">
+                                    <input type="email" required class="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-gold outline-none">
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Message</label>
-                                <textarea rows="4" class="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-gold outline-none"></textarea>
+                                <textarea rows="4" required class="w-full bg-gray-50 border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-gold outline-none"></textarea>
                             </div>
                             <button type="submit" class="w-full bg-gold text-white font-bold py-4 rounded-xl shadow-lg shadow-gold/20 hover:bg-yellow-600 transition">Send Inquiry</button>
                         </form>
@@ -280,10 +235,56 @@
             <div class="flex space-x-6">
                 <a href="#" class="text-gray-400 hover:text-gold"><i class="fab fa-instagram"></i></a>
                 <a href="#" class="text-gray-400 hover:text-gold"><i class="fab fa-facebook"></i></a>
-                <a href="#" class="text-gray-400 hover:text-gold"><i class="fab fa-whatsapp"></i></a>
+                <a href="https://wa.me/8615376427736" class="text-gray-400 hover:text-gold"><i class="fab fa-whatsapp"></i></a>
             </div>
         </div>
     </footer>
 
+    <!-- WhatsApp Float Button -->
+    <a href="https://wa.me/8615376427736?text=Hi%20Showlovein,%20I'm%20interested%20in%20your%20products" target="_blank" class="whatsapp-float w-14 h-14 bg-green-500 rounded-full flex items-center justify-center text-white shadow-2xl hover:bg-green-600 transition transform hover:scale-110">
+        <i class="fab fa-whatsapp text-2xl"></i>
+    </a>
+
+    <!-- Tawk.to Live Chat -->
+    <script type="text/javascript">
+    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    (function(){
+    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+    s1.async=true;
+    s1.src='https://embed.tawk.to/65f4a8b0a0c6737bd1303f93/1hp08fhgg';
+    s1.charset='UTF-8';
+    s1.setAttribute('crossorigin','*');
+    s0.parentNode.insertBefore(s1,s0);
+    })();
+    </script>
+
+    <script>
+        // Render product grid
+        document.addEventListener('DOMContentLoaded', () => {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = PRODUCTS.map(p => `
+                <a href="product.html?id=${p.id}" class="product-card group relative block">
+                    <div class="aspect-square bg-gray-100 rounded-2xl overflow-hidden mb-4 relative">
+                        <img src="${p.image}" alt="${p.short}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" loading="lazy">
+                        <div class="product-overlay absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 transition duration-300">
+                            <span class="bg-white text-gray-900 px-6 py-2 rounded-full font-semibold">View Details</span>
+                        </div>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900 mb-1 line-clamp-2">${p.title}</h3>
+                    <p class="text-gold font-bold mt-2">$${p.price.toFixed(2)} - $${p.price_max.toFixed(2)}</p>
+                    <p class="text-xs text-gray-400 mt-1 uppercase tracking-widest">${p.category}</p>
+                </a>
+            `).join('');
+            Cart.updateBadge();
+            Auth.updateUI();
+        });
+
+        // Inquiry form
+        document.getElementById('inquiry-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Thank you! Your inquiry has been sent. We will contact you shortly via email.');
+            e.target.reset();
+        });
+    </script>
 </body>
 </html>
