@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Block admin / sensitive paths
+Disallow: /admin
+Disallow: /admin-x9k2-secure-panel.html
+Disallow: /admin.js
+Disallow: /*.json$
+Disallow: /reviews.js
+Disallow: /products.js
+
+Sitemap: https://www.showlovein.com/sitemap.xml

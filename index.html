@@ -38,6 +38,7 @@
         .whatsapp-float { position: fixed; bottom: 90px; right: 20px; z-index: 40; }
     </style>
     <script src="products.js"></script>
+    <script src="reviews.js"></script>
 </head>
 <body class="bg-white">
 
@@ -136,6 +137,22 @@
             <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <!-- Products inserted by JS -->
             </div>
+        </div>
+    </section>
+
+    <!-- Customer Reviews -->
+    <section id="reviews" class="py-24 bg-pink-soft">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <span class="text-gold font-semibold tracking-widest uppercase text-sm mb-3 block">Loved Worldwide</span>
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">What Our Customers Say</h2>
+                <div class="flex items-center justify-center gap-2 mb-2">
+                    <span id="overall-stars" class="text-2xl"></span>
+                    <span id="overall-rating" class="text-2xl font-bold text-gray-900"></span>
+                </div>
+                <p id="overall-count" class="text-gray-500"></p>
+            </div>
+            <div id="featured-reviews" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
         </div>
     </section>
 
@@ -271,12 +288,42 @@
                         </div>
                     </div>
                     <h3 class="text-base font-bold text-gray-900 mb-1 line-clamp-2">${p.title}</h3>
+                    <div class="flex items-center gap-1 text-xs mt-1">
+                        ${Reviews.starsHtml(Math.round(Reviews.avg(p.id) || 5))}
+                        <span class="text-gray-500 ml-1">(${Reviews.count(p.id)})</span>
+                    </div>
                     <p class="text-gold font-bold mt-2">$${p.price.toFixed(2)} - $${p.price_max.toFixed(2)}</p>
                     <p class="text-xs text-gray-400 mt-1 uppercase tracking-widest">${p.category}</p>
                 </a>
             `).join('');
             Cart.updateBadge();
             Auth.updateUI();
+
+            // Overall rating
+            const totalReviews = REVIEWS.length;
+            const overallAvg = REVIEWS.reduce((s,r) => s+r.rating, 0) / totalReviews;
+            document.getElementById('overall-stars').innerHTML = Reviews.starsHtml(Math.round(overallAvg));
+            document.getElementById('overall-rating').textContent = overallAvg.toFixed(1);
+            document.getElementById('overall-count').textContent = `Trusted by ${totalReviews}+ customers in 50+ countries`;
+
+            // Featured 6 reviews (top-rated, recent)
+            const featured = [...REVIEWS]
+                .filter(r => r.rating >= 5 && r.text.length > 50)
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 6);
+            document.getElementById('featured-reviews').innerHTML = featured.map(r => `
+                <div class="bg-white p-6 rounded-2xl shadow-sm">
+                    <div class="text-sm mb-3">${Reviews.starsHtml(r.rating)}</div>
+                    <p class="text-gray-700 text-sm leading-relaxed mb-4 line-clamp-4">"${r.text}"</p>
+                    <div class="flex items-center gap-3 pt-4 border-t">
+                        <div class="w-10 h-10 bg-gold/10 rounded-full flex items-center justify-center text-gold font-bold">${(r.reviewer || 'A').charAt(0)}</div>
+                        <div>
+                            <p class="font-semibold text-sm text-gray-900">${r.reviewer}</p>
+                            <p class="text-xs text-gray-500">${Reviews.countryFlag(r.country)} ${r.country}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
         });
 
         // Inquiry form

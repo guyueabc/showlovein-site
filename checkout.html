@@ -220,9 +220,22 @@
                     const orderId = details.id;
                     const ship = getShippingInfo();
                     // Save order to localStorage for confirmation page
-                    localStorage.setItem('lastOrder', JSON.stringify({
-                        orderId, details, shipping: ship, items: Cart.get(), total: totalAmount, date: new Date().toISOString()
-                    }));
+                    const orderRecord = {
+                        id: orderId, orderId, details, shipping: ship,
+                        customer: { name: ship.name, email: ship.email, phone: ship.phone },
+                        payer: details.payer,
+                        items: Cart.get(),
+                        amount: totalAmount, total: totalAmount,
+                        status: 'completed',
+                        date: new Date().toISOString()
+                    };
+                    localStorage.setItem('lastOrder', JSON.stringify(orderRecord));
+                    // Persist to admin_orders log (admin panel reads this)
+                    try {
+                        const all = JSON.parse(localStorage.getItem('admin_orders') || '[]');
+                        all.unshift(orderRecord);
+                        localStorage.setItem('admin_orders', JSON.stringify(all));
+                    } catch(e) { console.warn('admin_orders save failed', e); }
                     Cart.clear();
                     location.href = 'success.html?order=' + orderId;
                 });

@@ -18,6 +18,7 @@
         .whatsapp-float { position: fixed; bottom: 90px; right: 20px; z-index: 40; }
     </style>
     <script src="products.js"></script>
+    <script src="reviews.js"></script>
 </head>
 <body class="bg-white">
 
@@ -69,7 +70,12 @@
                 <div>
                     <p class="text-sm text-gold uppercase tracking-widest mb-2" id="prod-category"></p>
                     <h1 class="text-3xl font-bold text-gray-900 mb-4" id="prod-title"></h1>
-                    <p class="text-2xl text-gold font-bold mb-6" id="prod-price"></p>
+                    <p class="text-2xl text-gold font-bold mb-3" id="prod-price"></p>
+                    <div class="flex items-center gap-3 mb-6">
+                        <div id="prod-stars" class="text-sm"></div>
+                        <span id="prod-rating-text" class="text-sm text-gray-500"></span>
+                        <a href="#reviews" class="text-sm text-gold hover:underline">View reviews</a>
+                    </div>
                     <p class="text-gray-600 mb-8 leading-relaxed" id="prod-description"></p>
 
                     <!-- Features -->
@@ -119,8 +125,81 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Reviews Section -->
+            <section id="reviews" class="mt-20 pt-12 border-t">
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Review Summary -->
+                    <div class="md:col-span-1">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">Customer Reviews</h2>
+                        <div class="bg-pink-50 rounded-2xl p-6">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span id="rev-avg-num" class="text-4xl font-bold text-gray-900">5.0</span>
+                                <div>
+                                    <div id="rev-avg-stars" class="text-sm"></div>
+                                    <p id="rev-count-text" class="text-xs text-gray-500 mt-1">Based on 0 reviews</p>
+                                </div>
+                            </div>
+                            <div id="rev-distribution" class="mt-4 space-y-1"></div>
+                            <button onclick="showReviewForm()" class="mt-6 w-full bg-gold text-white py-2.5 rounded-lg font-semibold hover:bg-yellow-600 text-sm">
+                                <i class="fas fa-pen"></i> Write a Review
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Review List -->
+                    <div class="md:col-span-2">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-semibold text-gray-900">All Reviews</h3>
+                            <select id="rev-sort" onchange="renderReviews()" class="text-sm border rounded-lg px-3 py-2">
+                                <option value="recent">Most Recent</option>
+                                <option value="highest">Highest Rated</option>
+                                <option value="lowest">Lowest Rated</option>
+                            </select>
+                        </div>
+                        <div id="rev-list" class="space-y-6"></div>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
+
+    <!-- Review Form Modal -->
+    <div id="review-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Write a Review</h3>
+                <button onclick="closeReviewForm()" class="text-gray-400 hover:text-gray-700"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="review-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Your Rating *</label>
+                    <div id="star-input" class="flex gap-1 text-2xl text-gray-300">
+                        <i class="fas fa-star cursor-pointer hover:text-yellow-400" data-val="1"></i>
+                        <i class="fas fa-star cursor-pointer hover:text-yellow-400" data-val="2"></i>
+                        <i class="fas fa-star cursor-pointer hover:text-yellow-400" data-val="3"></i>
+                        <i class="fas fa-star cursor-pointer hover:text-yellow-400" data-val="4"></i>
+                        <i class="fas fa-star cursor-pointer hover:text-yellow-400" data-val="5"></i>
+                    </div>
+                    <input type="hidden" id="rev-rating" value="5">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Your Name *</label>
+                    <input type="text" id="rev-name" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-gold outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Country *</label>
+                    <input type="text" id="rev-country" required placeholder="e.g., United States" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-gold outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Review *</label>
+                    <textarea id="rev-text" required rows="4" minlength="10" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-gold outline-none"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-gold text-white py-3 rounded-lg font-semibold hover:bg-yellow-600">Submit Review</button>
+                <p class="text-xs text-gray-500 text-center">Reviews are subject to approval before being published.</p>
+            </form>
+        </div>
+    </div>
 
     <!-- WhatsApp Float -->
     <a href="https://wa.me/8615376427736" target="_blank" class="whatsapp-float w-14 h-14 bg-green-500 rounded-full flex items-center justify-center text-white shadow-2xl hover:bg-green-600">
@@ -203,9 +282,121 @@
             setTimeout(() => location.href = 'cart.html', 500);
         }
 
+        // === Reviews ===
+        function renderProductRating() {
+            if (!product) return;
+            const userReviews = JSON.parse(localStorage.getItem('userReviews') || '[]').filter(r => r.product_id === productId && r.approved);
+            const allReviews = [...Reviews.forProduct(productId), ...userReviews];
+            const count = allReviews.length;
+            const avg = count ? (allReviews.reduce((s,r) => s+r.rating, 0) / count) : 5.0;
+
+            document.getElementById('prod-stars').innerHTML = Reviews.starsHtml(Math.round(avg));
+            document.getElementById('prod-rating-text').textContent = `${avg.toFixed(1)} (${count} reviews)`;
+
+            document.getElementById('rev-avg-num').textContent = avg.toFixed(1);
+            document.getElementById('rev-avg-stars').innerHTML = Reviews.starsHtml(Math.round(avg));
+            document.getElementById('rev-count-text').textContent = `Based on ${count} reviews`;
+
+            // Distribution
+            const dist = [0,0,0,0,0];
+            allReviews.forEach(r => { if (r.rating >= 1 && r.rating <= 5) dist[r.rating-1]++; });
+            const distHtml = [5,4,3,2,1].map(s => {
+                const pct = count ? (dist[s-1] / count * 100) : 0;
+                return `
+                <div class="flex items-center gap-2 text-xs text-gray-600">
+                    <span class="w-8">${s} ★</span>
+                    <div class="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
+                        <div class="bg-yellow-400 h-full" style="width:${pct}%"></div>
+                    </div>
+                    <span class="w-8 text-right">${dist[s-1]}</span>
+                </div>`;
+            }).join('');
+            document.getElementById('rev-distribution').innerHTML = distHtml;
+
+            renderReviews();
+        }
+
+        function renderReviews() {
+            if (!product) return;
+            const sort = document.getElementById('rev-sort').value;
+            const userReviews = JSON.parse(localStorage.getItem('userReviews') || '[]').filter(r => r.product_id === productId && r.approved);
+            let reviews = [...Reviews.forProduct(productId), ...userReviews];
+
+            if (sort === 'recent') reviews.sort((a,b) => (b.date||'').localeCompare(a.date||''));
+            else if (sort === 'highest') reviews.sort((a,b) => b.rating - a.rating);
+            else if (sort === 'lowest') reviews.sort((a,b) => a.rating - b.rating);
+
+            const list = document.getElementById('rev-list');
+            if (reviews.length === 0) {
+                list.innerHTML = '<p class="text-gray-500 text-center py-12">Be the first to review this product!</p>';
+                return;
+            }
+            list.innerHTML = reviews.map(r => `
+                <div class="border-b border-gray-100 pb-6">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-10 h-10 bg-gold/10 rounded-full flex items-center justify-center text-gold font-bold">
+                            ${(r.reviewer || 'A').charAt(0)}
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-semibold text-sm text-gray-900">${r.reviewer}</p>
+                            <p class="text-xs text-gray-500">${Reviews.countryFlag(r.country)} ${r.country} • ${r.date}</p>
+                        </div>
+                        <div class="text-sm">${Reviews.starsHtml(r.rating)}</div>
+                    </div>
+                    <p class="text-gray-700 text-sm leading-relaxed mt-3">${r.text}</p>
+                </div>
+            `).join('');
+        }
+
+        // Modal
+        function showReviewForm() {
+            document.getElementById('review-modal').classList.remove('hidden');
+            document.getElementById('review-modal').classList.add('flex');
+        }
+        function closeReviewForm() {
+            document.getElementById('review-modal').classList.add('hidden');
+            document.getElementById('review-modal').classList.remove('flex');
+        }
+
+        // Star input
+        document.querySelectorAll('#star-input i').forEach(star => {
+            star.addEventListener('click', (e) => {
+                const val = parseInt(e.target.dataset.val);
+                document.getElementById('rev-rating').value = val;
+                document.querySelectorAll('#star-input i').forEach(s => {
+                    s.classList.toggle('text-yellow-400', parseInt(s.dataset.val) <= val);
+                    s.classList.toggle('text-gray-300', parseInt(s.dataset.val) > val);
+                });
+            });
+        });
+        // Initial 5 stars
+        document.querySelectorAll('#star-input i').forEach(s => s.classList.add('text-yellow-400'));
+
+        document.getElementById('review-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const review = {
+                id: 'r_' + Date.now(),
+                product_id: productId,
+                reviewer: document.getElementById('rev-name').value,
+                country: document.getElementById('rev-country').value,
+                rating: parseInt(document.getElementById('rev-rating').value),
+                text: document.getElementById('rev-text').value,
+                date: new Date().toISOString().slice(0,10),
+                approved: false,  // Pending admin approval
+                submittedAt: new Date().toISOString()
+            };
+            const all = JSON.parse(localStorage.getItem('userReviews') || '[]');
+            all.push(review);
+            localStorage.setItem('userReviews', JSON.stringify(all));
+            closeReviewForm();
+            alert('Thank you! Your review has been submitted and will appear after approval.');
+            e.target.reset();
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
             Cart.updateBadge();
             Auth.updateUI();
+            renderProductRating();
         });
     </script>
 </body>
