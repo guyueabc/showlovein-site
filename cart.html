@@ -11,7 +11,9 @@
         .text-gold { color: #D4AF37; }
         .bg-gold { background-color: #D4AF37; }
     </style>
-    <script src="products.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="supabase-client.js"></script>
 </head>
 <body class="bg-gray-50">
 
@@ -73,7 +75,7 @@
     </main>
 
     <script>
-        function renderCart() {
+        async function renderCart() {
             const cart = Cart.get();
             const itemsEl = document.getElementById('cart-items');
             const emptyEl = document.getElementById('cart-empty');
@@ -87,17 +89,18 @@
             emptyEl.classList.add('hidden');
             contentEl.classList.remove('hidden');
 
+            const products = await Products.list();
             itemsEl.innerHTML = cart.map((item, i) => {
-                const p = PRODUCTS.find(x => x.id === item.productId);
+                const p = products.find(x => x.id === item.productId);
                 if (!p) return '';
-                const variantText = Object.entries(item.variant).map(([k, v]) => `${k}: ${v}`).join(' • ');
+                const variantText = Object.entries(item.variant || {}).map(([k, v]) => `${k}: ${v}`).join(' • ');
                 return `
                     <div class="bg-white rounded-2xl p-4 flex gap-4 shadow-sm">
                         <img src="${p.image}" alt="${p.short}" class="w-24 h-24 object-cover rounded-xl">
                         <div class="flex-1">
                             <a href="product.html?id=${p.id}" class="font-semibold text-gray-900 hover:text-gold line-clamp-2 text-sm">${p.title}</a>
                             <p class="text-xs text-gray-500 mt-1">${variantText}</p>
-                            <p class="text-gold font-bold mt-2">$${p.price.toFixed(2)}</p>
+                            <p class="text-gold font-bold mt-2">$${parseFloat(p.price).toFixed(2)}</p>
                         </div>
                         <div class="flex flex-col items-end justify-between">
                             <button onclick="removeItem(${i})" class="text-gray-400 hover:text-red-500"><i class="fas fa-trash"></i></button>
@@ -111,24 +114,24 @@
                 `;
             }).join('');
 
-            const total = Cart.getTotal();
+            const total = await Cart.getTotal();
             document.getElementById('subtotal').textContent = '$' + total.toFixed(2);
             document.getElementById('total').textContent = '$' + total.toFixed(2);
         }
 
-        function removeItem(i) {
+        async function removeItem(i) {
             Cart.remove(i);
-            renderCart();
+            await renderCart();
         }
-        function updateQty(i, qty) {
+        async function updateQty(i, qty) {
             Cart.updateQty(i, qty);
-            renderCart();
+            await renderCart();
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             Cart.updateBadge();
             Auth.updateUI();
-            renderCart();
+            await renderCart();
         });
     </script>
 </body>

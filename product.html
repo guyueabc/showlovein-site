@@ -17,8 +17,9 @@
         .variant-btn.active { background: #D4AF37; color: white; border-color: #D4AF37; }
         .whatsapp-float { position: fixed; bottom: 90px; right: 20px; z-index: 40; }
     </style>
-    <script src="products.js"></script>
-    <script src="reviews.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="supabase-client.js"></script>
 </head>
 <body class="bg-white">
 
@@ -215,28 +216,31 @@
     <script>
         const params = new URLSearchParams(location.search);
         const productId = params.get('id');
-        const product = PRODUCTS.find(p => p.id === productId);
+        let product = null;
         const selectedVariants = {};
 
-        if (!product) {
-            document.querySelector('main').innerHTML = '<div class="max-w-4xl mx-auto px-4 py-20 text-center"><h1 class="text-3xl font-bold mb-4">Product Not Found</h1><a href="index.html" class="text-gold underline">Back to home</a></div>';
-        } else {
+        async function loadProduct() {
+            product = await Products.get(productId);
+            if (!product) {
+                document.querySelector('main').innerHTML = '<div class="max-w-4xl mx-auto px-4 py-20 text-center"><h1 class="text-3xl font-bold mb-4">Product Not Found</h1><a href="index.html" class="text-gold underline">Back to home</a></div>';
+                return;
+            }
             document.title = product.short + ' | Showlovein';
             document.getElementById('bc-title').textContent = product.short;
             document.getElementById('prod-image').src = product.image;
             document.getElementById('prod-image').alt = product.short;
             document.getElementById('prod-category').textContent = product.category;
             document.getElementById('prod-title').textContent = product.title;
-            document.getElementById('prod-price').textContent = `$${product.price.toFixed(2)} - $${product.price_max.toFixed(2)}`;
+            document.getElementById('prod-price').textContent = `$${parseFloat(product.price).toFixed(2)}${product.price_max ? ' - $' + parseFloat(product.price_max).toFixed(2) : ''}`;
             document.getElementById('prod-description').textContent = product.description;
 
-            // Features
-            document.getElementById('prod-features').innerHTML = product.features.map(f => `
+            const features = product.features || [];
+            document.getElementById('prod-features').innerHTML = features.map(f => `
                 <li class="flex items-center gap-2 text-sm text-gray-700"><i class="fas fa-check text-gold"></i> ${f}</li>
             `).join('');
 
-            // Variants
-            const variantHtml = Object.entries(product.variants).map(([name, options]) => {
+            const variants = product.variants || {};
+            const variantHtml = Object.entries(variants).map(([name, options]) => {
                 selectedVariants[name] = options[0];
                 return `
                     <div>
@@ -250,6 +254,8 @@
                 `;
             }).join('');
             document.getElementById('prod-variants').innerHTML = variantHtml;
+
+            await renderProductRating();
         }
 
         function selectVariant(name, value, btn) {
@@ -282,13 +288,14 @@
             setTimeout(() => location.href = 'cart.html', 500);
         }
 
-        // === Reviews ===
-        function renderProductRating() {
+        // === Reviews (Supabase) ===
+        let _productReviews = [];
+
+        async function renderProductRating() {
             if (!product) return;
-            const userReviews = JSON.parse(localStorage.getItem('userReviews') || '[]').filter(r => r.product_id === productId && r.approved);
-            const allReviews = [...Reviews.forProduct(productId), ...userReviews];
-            const count = allReviews.length;
-            const avg = count ? (allReviews.reduce((s,r) => s+r.rating, 0) / count) : 5.0;
+            _productReviews = await Reviews.forProduct(productId);
+            const count = _productReviews.length;
+            const avg = count ? (_productReviews.reduce((s,r) => s+r.rating, 0) / count) : 5.0;
 
             document.getElementById('prod-stars').innerHTML = Reviews.starsHtml(Math.round(avg));
             document.getElementById('prod-rating-text').textContent = `${avg.toFixed(1)} (${count} reviews)`;
@@ -297,9 +304,8 @@
             document.getElementById('rev-avg-stars').innerHTML = Reviews.starsHtml(Math.round(avg));
             document.getElementById('rev-count-text').textContent = `Based on ${count} reviews`;
 
-            // Distribution
             const dist = [0,0,0,0,0];
-            allReviews.forEach(r => { if (r.rating >= 1 && r.rating <= 5) dist[r.rating-1]++; });
+            _productReviews.forEach(r => { if (r.rating >= 1 && r.rating <= 5) dist[r.rating-1]++; });
             const distHtml = [5,4,3,2,1].map(s => {
                 const pct = count ? (dist[s-1] / count * 100) : 0;
                 return `
@@ -319,10 +325,9 @@
         function renderReviews() {
             if (!product) return;
             const sort = document.getElementById('rev-sort').value;
-            const userReviews = JSON.parse(localStorage.getItem('userReviews') || '[]').filter(r => r.product_id === productId && r.approved);
-            let reviews = [...Reviews.forProduct(productId), ...userReviews];
+            let reviews = [..._productReviews];
 
-            if (sort === 'recent') reviews.sort((a,b) => (b.date||'').localeCompare(a.date||''));
+            if (sort === 'recent') reviews.sort((a,b) => (b.created_at||'').localeCompare(a.created_at||''));
             else if (sort === 'highest') reviews.sort((a,b) => b.rating - a.rating);
             else if (sort === 'lowest') reviews.sort((a,b) => a.rating - b.rating);
 
@@ -331,21 +336,23 @@
                 list.innerHTML = '<p class="text-gray-500 text-center py-12">Be the first to review this product!</p>';
                 return;
             }
-            list.innerHTML = reviews.map(r => `
+            list.innerHTML = reviews.map(r => {
+                const date = r.created_at ? new Date(r.created_at).toLocaleDateString() : '';
+                return `
                 <div class="border-b border-gray-100 pb-6">
                     <div class="flex items-center gap-3 mb-2">
                         <div class="w-10 h-10 bg-gold/10 rounded-full flex items-center justify-center text-gold font-bold">
-                            ${(r.reviewer || 'A').charAt(0)}
+                            ${(r.reviewer_name || 'A').charAt(0)}
                         </div>
                         <div class="flex-1">
-                            <p class="font-semibold text-sm text-gray-900">${r.reviewer}</p>
-                            <p class="text-xs text-gray-500">${Reviews.countryFlag(r.country)} ${r.country} • ${r.date}</p>
+                            <p class="font-semibold text-sm text-gray-900">${r.reviewer_name}</p>
+                            <p class="text-xs text-gray-500">${Reviews.countryFlag(r.country)} ${r.country || 'Worldwide'} • ${date}</p>
                         </div>
                         <div class="text-sm">${Reviews.starsHtml(r.rating)}</div>
                     </div>
                     <p class="text-gray-700 text-sm leading-relaxed mt-3">${r.text}</p>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
         }
 
         // Modal
@@ -372,31 +379,33 @@
         // Initial 5 stars
         document.querySelectorAll('#star-input i').forEach(s => s.classList.add('text-yellow-400'));
 
-        document.getElementById('review-form').addEventListener('submit', (e) => {
+        document.getElementById('review-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const review = {
-                id: 'r_' + Date.now(),
-                product_id: productId,
-                reviewer: document.getElementById('rev-name').value,
-                country: document.getElementById('rev-country').value,
-                rating: parseInt(document.getElementById('rev-rating').value),
-                text: document.getElementById('rev-text').value,
-                date: new Date().toISOString().slice(0,10),
-                approved: false,  // Pending admin approval
-                submittedAt: new Date().toISOString()
-            };
-            const all = JSON.parse(localStorage.getItem('userReviews') || '[]');
-            all.push(review);
-            localStorage.setItem('userReviews', JSON.stringify(all));
-            closeReviewForm();
-            alert('Thank you! Your review has been submitted and will appear after approval.');
-            e.target.reset();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const original = submitBtn ? submitBtn.textContent : '';
+            if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submitting...'; }
+            try {
+                await Reviews.submit({
+                    product_id: productId,
+                    reviewer_name: document.getElementById('rev-name').value,
+                    country: document.getElementById('rev-country').value,
+                    rating: parseInt(document.getElementById('rev-rating').value),
+                    text: document.getElementById('rev-text').value
+                });
+                closeReviewForm();
+                alert('Thank you! Your review has been submitted and will appear after approval.');
+                e.target.reset();
+            } catch (err) {
+                alert('Failed to submit review: ' + (err.message || err));
+            } finally {
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = original; }
+            }
         });
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             Cart.updateBadge();
             Auth.updateUI();
-            renderProductRating();
+            await loadProduct();
         });
     </script>
 </body>

@@ -37,8 +37,9 @@
         .modal-backdrop { background: rgba(0,0,0,0.5); }
         .whatsapp-float { position: fixed; bottom: 90px; right: 20px; z-index: 40; }
     </style>
-    <script src="products.js"></script>
-    <script src="reviews.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="supabase-client.js"></script>
 </head>
 <body class="bg-white">
 
@@ -276,54 +277,71 @@
     </script>
 
     <script>
-        // Render product grid
-        document.addEventListener('DOMContentLoaded', () => {
+        // Render product grid (now async, fetches from Supabase)
+        document.addEventListener('DOMContentLoaded', async () => {
             const grid = document.getElementById('product-grid');
-            grid.innerHTML = PRODUCTS.map(p => `
-                <a href="product.html?id=${p.id}" class="product-card group relative block">
-                    <div class="aspect-square bg-gray-100 rounded-2xl overflow-hidden mb-4 relative">
-                        <img src="${p.image}" alt="${p.short}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" loading="lazy">
-                        <div class="product-overlay absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 transition duration-300">
-                            <span class="bg-white text-gray-900 px-6 py-2 rounded-full font-semibold">View Details</span>
-                        </div>
-                    </div>
-                    <h3 class="text-base font-bold text-gray-900 mb-1 line-clamp-2">${p.title}</h3>
-                    <div class="flex items-center gap-1 text-xs mt-1">
-                        ${Reviews.starsHtml(Math.round(Reviews.avg(p.id) || 5))}
-                        <span class="text-gray-500 ml-1">(${Reviews.count(p.id)})</span>
-                    </div>
-                    <p class="text-gold font-bold mt-2">$${p.price.toFixed(2)} - $${p.price_max.toFixed(2)}</p>
-                    <p class="text-xs text-gray-400 mt-1 uppercase tracking-widest">${p.category}</p>
-                </a>
-            `).join('');
-            Cart.updateBadge();
-            Auth.updateUI();
+            grid.innerHTML = '<p class="col-span-4 text-center text-gray-400 py-12">Loading products...</p>';
 
-            // Overall rating
-            const totalReviews = REVIEWS.length;
-            const overallAvg = REVIEWS.reduce((s,r) => s+r.rating, 0) / totalReviews;
-            document.getElementById('overall-stars').innerHTML = Reviews.starsHtml(Math.round(overallAvg));
-            document.getElementById('overall-rating').textContent = overallAvg.toFixed(1);
-            document.getElementById('overall-count').textContent = `Trusted by ${totalReviews}+ customers in 50+ countries`;
+            try {
+                const products = await Products.list();
+                const allReviews = await Reviews.all();
+                const ratingsByProduct = {};
+                allReviews.forEach(r => {
+                    if (!ratingsByProduct[r.product_id]) ratingsByProduct[r.product_id] = [];
+                    ratingsByProduct[r.product_id].push(r.rating);
+                });
 
-            // Featured 6 reviews (top-rated, recent)
-            const featured = [...REVIEWS]
-                .filter(r => r.rating >= 5 && r.text.length > 50)
-                .sort(() => 0.5 - Math.random())
-                .slice(0, 6);
-            document.getElementById('featured-reviews').innerHTML = featured.map(r => `
-                <div class="bg-white p-6 rounded-2xl shadow-sm">
-                    <div class="text-sm mb-3">${Reviews.starsHtml(r.rating)}</div>
-                    <p class="text-gray-700 text-sm leading-relaxed mb-4 line-clamp-4">"${r.text}"</p>
-                    <div class="flex items-center gap-3 pt-4 border-t">
-                        <div class="w-10 h-10 bg-gold/10 rounded-full flex items-center justify-center text-gold font-bold">${(r.reviewer || 'A').charAt(0)}</div>
-                        <div>
-                            <p class="font-semibold text-sm text-gray-900">${r.reviewer}</p>
-                            <p class="text-xs text-gray-500">${Reviews.countryFlag(r.country)} ${r.country}</p>
+                grid.innerHTML = products.map(p => {
+                    const ratings = ratingsByProduct[p.id] || [];
+                    const avg = ratings.length ? ratings.reduce((s,r) => s+r, 0) / ratings.length : 5;
+                    return `
+                    <a href="product.html?id=${p.id}" class="product-card group relative block">
+                        <div class="aspect-square bg-gray-100 rounded-2xl overflow-hidden mb-4 relative">
+                            <img src="${p.image}" alt="${p.short}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" loading="lazy">
+                            <div class="product-overlay absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 transition duration-300">
+                                <span class="bg-white text-gray-900 px-6 py-2 rounded-full font-semibold">View Details</span>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            `).join('');
+                        <h3 class="text-base font-bold text-gray-900 mb-1 line-clamp-2">${p.title}</h3>
+                        <div class="flex items-center gap-1 text-xs mt-1">
+                            ${Reviews.starsHtml(Math.round(avg))}
+                            <span class="text-gray-500 ml-1">(${ratings.length})</span>
+                        </div>
+                        <p class="text-gold font-bold mt-2">$${parseFloat(p.price).toFixed(2)}${p.price_max ? ' - $' + parseFloat(p.price_max).toFixed(2) : ''}</p>
+                        <p class="text-xs text-gray-400 mt-1 uppercase tracking-widest">${p.category}</p>
+                    </a>`;
+                }).join('');
+
+                // Overall rating
+                if (allReviews.length) {
+                    const overallAvg = allReviews.reduce((s,r) => s+r.rating, 0) / allReviews.length;
+                    document.getElementById('overall-stars').innerHTML = Reviews.starsHtml(Math.round(overallAvg));
+                    document.getElementById('overall-rating').textContent = overallAvg.toFixed(1);
+                    document.getElementById('overall-count').textContent = `Trusted by ${allReviews.length}+ customers in 50+ countries`;
+
+                    // Featured 6 reviews
+                    const featured = [...allReviews]
+                        .filter(r => r.rating >= 5 && r.text.length > 50)
+                        .sort(() => 0.5 - Math.random())
+                        .slice(0, 6);
+                    document.getElementById('featured-reviews').innerHTML = featured.map(r => `
+                        <div class="bg-white p-6 rounded-2xl shadow-sm">
+                            <div class="text-sm mb-3">${Reviews.starsHtml(r.rating)}</div>
+                            <p class="text-gray-700 text-sm leading-relaxed mb-4 line-clamp-4">"${r.text}"</p>
+                            <div class="flex items-center gap-3 pt-4 border-t">
+                                <div class="w-10 h-10 bg-gold/10 rounded-full flex items-center justify-center text-gold font-bold">${(r.reviewer_name || 'A').charAt(0)}</div>
+                                <div>
+                                    <p class="font-semibold text-sm text-gray-900">${r.reviewer_name}</p>
+                                    <p class="text-xs text-gray-500">${Reviews.countryFlag(r.country)} ${r.country || 'Worldwide'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) {
+                console.error('Failed to load products:', e);
+                grid.innerHTML = '<p class="col-span-4 text-center text-red-500 py-12">⚠️ Failed to load products. Please refresh.</p>';
+            }
         });
 
         // Inquiry form

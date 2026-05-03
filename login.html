@@ -12,7 +12,9 @@
         .bg-gold { background-color: #D4AF37; }
         .bg-pink-soft { background-color: #FFF5F7; }
     </style>
-    <script src="products.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="supabase-client.js"></script>
 </head>
 <body class="bg-pink-soft min-h-screen flex items-center justify-center p-4">
     <div class="max-w-md w-full">
@@ -87,23 +89,41 @@
             document.getElementById('name-field').classList.toggle('hidden', !isSignUp);
         }
 
-        function socialLogin(provider) {
-            // Demo: simulated social login. In production, integrate Firebase Auth or platform SDK.
-            const name = prompt(`Sign in with ${provider}\n\nEnter your name (demo mode):`);
-            if (!name) return;
-            const email = prompt('Enter your email:');
-            if (!email) return;
-            Auth.setUser({ name, email, provider, loginAt: new Date().toISOString() });
-            location.href = 'index.html';
+        async function socialLogin(provider) {
+            try {
+                const { error } = await Auth.signInWithOAuth(provider.toLowerCase());
+                if (error) throw error;
+            } catch (err) {
+                alert('Login failed: ' + err.message);
+            }
         }
 
-        document.getElementById('email-form').addEventListener('submit', (e) => {
+        document.getElementById('email-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
-            const name = isSignUp ? document.getElementById('name').value : email.split('@')[0];
-            // Demo: client-side auth (replace with Firebase Auth or backend)
-            Auth.setUser({ name, email, provider: 'Email', loginAt: new Date().toISOString() });
-            location.href = 'index.html';
+            const password = document.getElementById('password').value;
+            const name = document.getElementById('name').value;
+            const submitBtn = document.getElementById('submit-btn');
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = isSignUp ? 'Creating...' : 'Signing In...';
+
+            try {
+                if (isSignUp) {
+                    const { data, error } = await Auth.signUp(email, password, { full_name: name });
+                    if (error) throw error;
+                    alert('Check your email for the confirmation link!');
+                } else {
+                    const { data, error } = await Auth.signIn(email, password);
+                    if (error) throw error;
+                    location.href = 'index.html';
+                }
+            } catch (err) {
+                alert('Auth failed: ' + err.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = isSignUp ? 'Create Account' : 'Sign In';
+            }
         });
     </script>
 </body>

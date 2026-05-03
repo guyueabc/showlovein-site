@@ -40,6 +40,9 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="supabase-client.js"></script>
     <script>
         const params = new URLSearchParams(location.search);
         const orderId = params.get('order');
@@ -47,9 +50,25 @@
 
         if (orderId) document.getElementById('order-id').textContent = orderId;
         if (lastOrder) {
-            document.getElementById('order-total').textContent = '$' + lastOrder.total.toFixed(2);
-            document.getElementById('order-email').textContent = lastOrder.shipping.email;
+            document.getElementById('order-total').textContent = '$' + parseFloat(lastOrder.total).toFixed(2);
+            document.getElementById('order-email').textContent = lastOrder.shipping?.email || '';
         }
+
+        // Try to confirm from Supabase
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!orderId || !window.db) return;
+            try {
+                const { data, error } = await db.from('orders')
+                    .select('order_number,total,customer_email')
+                    .eq('order_number', orderId)
+                    .maybeSingle();
+                if (data) {
+                    document.getElementById('order-id').textContent = data.order_number;
+                    document.getElementById('order-total').textContent = '$' + parseFloat(data.total).toFixed(2);
+                    document.getElementById('order-email').textContent = data.customer_email || '';
+                }
+            } catch (e) { console.warn('order lookup failed', e); }
+        });
     </script>
 </body>
 </html>

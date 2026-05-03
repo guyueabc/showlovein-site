@@ -11,7 +11,9 @@
         .text-gold { color: #D4AF37; }
         .bg-gold { background-color: #D4AF37; }
     </style>
-    <script src="products.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="supabase-client.js"></script>
     <!-- PayPal SDK -->
     <script src="https://www.paypal.com/sdk/js?client-id=AbRagU3CMZnBsmmwQOEV6XhSNIGRqoSQeeIRJgbTeGVBx0bR_-qf9jLmG8y9KicplNDqZYwD69Fpuyk7&currency=USD&intent=capture"></script>
 </head>
@@ -118,17 +120,20 @@
 
     <script>
         let totalAmount = 0;
+        let itemTotal = 0;
+        let PRODUCTS_CACHE = [];
         const SHIPPING = 15.00;
 
-        function renderOrder() {
+        async function renderOrder() {
             const cart = Cart.get();
             if (cart.length === 0) {
                 location.href = 'cart.html';
                 return;
             }
+            PRODUCTS_CACHE = await Products.list();
             const itemsEl = document.getElementById('order-items');
             itemsEl.innerHTML = cart.map(item => {
-                const p = PRODUCTS.find(x => x.id === item.productId);
+                const p = PRODUCTS_CACHE.find(x => x.id === item.productId);
                 if (!p) return '';
                 return `
                     <div class="flex gap-3">
@@ -137,14 +142,14 @@
                             <p class="font-medium text-gray-900 line-clamp-1">${p.short}</p>
                             <p class="text-xs text-gray-500">Qty: ${item.qty}</p>
                         </div>
-                        <span class="text-sm font-semibold text-gray-900">$${(p.price * item.qty).toFixed(2)}</span>
+                        <span class="text-sm font-semibold text-gray-900">$${(parseFloat(p.price) * item.qty).toFixed(2)}</span>
                     </div>
                 `;
             }).join('');
 
-            const subtotal = Cart.getTotal();
-            totalAmount = subtotal + SHIPPING;
-            document.getElementById('ck-subtotal').textContent = '$' + subtotal.toFixed(2);
+            itemTotal = await Cart.getTotal();
+            totalAmount = itemTotal + SHIPPING;
+            document.getElementById('ck-subtotal').textContent = '$' + itemTotal.toFixed(2);
             document.getElementById('ck-total').textContent = '$' + totalAmount.toFixed(2);
         }
 
@@ -189,19 +194,20 @@
                             value: totalAmount.toFixed(2),
                             currency_code: 'USD',
                             breakdown: {
-                                item_total: { value: Cart.getTotal().toFixed(2), currency_code: 'USD' },
+                                item_total: { value: itemTotal.toFixed(2), currency_code: 'USD' },
                                 shipping: { value: SHIPPING.toFixed(2), currency_code: 'USD' }
                             }
                         },
                         items: Cart.get().map(item => {
-                            const p = PRODUCTS.find(x => x.id === item.productId);
+                            const p = PRODUCTS_CACHE.find(x => x.id === item.productId);
+                            if (!p) return null;
                             return {
                                 name: p.short.substring(0, 127),
                                 quantity: item.qty.toString(),
-                                unit_amount: { value: p.price.toFixed(2), currency_code: 'USD' },
+                                unit_amount: { value: parseFloat(p.price).toFixed(2), currency_code: 'USD' },
                                 sku: p.id
                             };
-                        }),
+                        }).filter(Boolean),
                         shipping: {
                             name: { full_name: ship.name },
                             address: {
@@ -216,28 +222,56 @@
                 });
             },
             onApprove: (data, actions) => {
-                return actions.order.capture().then(details => {
-                    const orderId = details.id;
+                return actions.order.capture().then(async details => {
+                    const paypalId = details.id;
                     const ship = getShippingInfo();
-                    // Save order to localStorage for confirmation page
+                    const cartItems = Cart.get().map(item => {
+                        const p = PRODUCTS_CACHE.find(x => x.id === item.productId);
+                        return {
+                            product_id: item.productId,
+                            product_title: p ? p.title : '',
+                            product_image: p ? p.image : '',
+                            variant: item.variant,
+                            qty: item.qty,
+                            unit_price: p ? parseFloat(p.price) : 0,
+                            line_total: p ? parseFloat(p.price) * item.qty : 0
+                        };
+                    });
+                    let orderNumber = paypalId;
+                    try {
+                        const result = await Orders.create({
+                            customer_email: ship.email,
+                            customer_name: ship.name,
+                            customer_phone: ship.phone,
+                            shipping_address: ship,
+                            items: cartItems,
+                            subtotal: itemTotal,
+                            total: totalAmount,
+                            payment_method: 'paypal',
+                            payment_id: paypalId
+                        });
+                        if (result.error) {
+                            console.error('[Orders.create] error', result.error);
+                            document.getElementById('payment-message').innerHTML = '<span class="text-red-500"><i class="fas fa-exclamation-circle"></i> Payment captured but order save failed. Please contact support with PayPal ID: ' + paypalId + '</span>';
+                        } else {
+                            orderNumber = result.orderNumber;
+                        }
+                    } catch (err) {
+                        console.error('[Orders.create] exception', err);
+                    }
+                    // Local fallback for success page if Supabase fails
                     const orderRecord = {
-                        id: orderId, orderId, details, shipping: ship,
+                        order_number: orderNumber,
+                        paypal_id: paypalId,
+                        details, shipping: ship,
                         customer: { name: ship.name, email: ship.email, phone: ship.phone },
-                        payer: details.payer,
-                        items: Cart.get(),
-                        amount: totalAmount, total: totalAmount,
-                        status: 'completed',
+                        items: cartItems,
+                        subtotal: itemTotal, shipping_fee: SHIPPING, total: totalAmount,
                         date: new Date().toISOString()
                     };
-                    localStorage.setItem('lastOrder', JSON.stringify(orderRecord));
-                    // Persist to admin_orders log (admin panel reads this)
-                    try {
-                        const all = JSON.parse(localStorage.getItem('admin_orders') || '[]');
-                        all.unshift(orderRecord);
-                        localStorage.setItem('admin_orders', JSON.stringify(all));
-                    } catch(e) { console.warn('admin_orders save failed', e); }
+                    try { localStorage.setItem('lastOrder', JSON.stringify(orderRecord)); } catch(e) {}
                     Cart.clear();
-                    location.href = 'success.html?order=' + orderId;
+                    location.href = 'success.html?order=' + encodeURIComponent(orderNumber);
                 });
             },
             onError: (err) => {
@@ -248,14 +282,16 @@
             }
         }).render('#paypal-button-container');
 
-        document.addEventListener('DOMContentLoaded', () => {
-            renderOrder();
+        document.addEventListener('DOMContentLoaded', async () => {
+            await renderOrder();
             // Pre-fill from logged-in user
-            const user = Auth.getUser();
+            const user = await Auth.getUser();
             if (user) {
                 if (user.email) document.getElementById('email').value = user.email;
-                if (user.name) {
-                    const parts = user.name.split(' ');
+                const meta = user.user_metadata || {};
+                const fullName = meta.full_name || meta.name || '';
+                if (fullName) {
+                    const parts = fullName.split(' ');
                     document.getElementById('firstname').value = parts[0] || '';
                     document.getElementById('lastname').value = parts.slice(1).join(' ') || '';
                 }
