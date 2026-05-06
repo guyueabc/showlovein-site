@@ -256,6 +256,37 @@
             document.getElementById('prod-variants').innerHTML = variantHtml;
 
             await renderProductRating();
+            injectStructuredData();
+        }
+
+        function injectStructuredData() {
+            if (!product) return;
+            const avg = _productReviews.length ? (_productReviews.reduce((s,r) => s+r.rating, 0) / _productReviews.length) : 5.0;
+            const jsonLd = {
+                "@context": "https://schema.org/",
+                "@type": "Product",
+                "name": product.title,
+                "image": [window.location.origin + '/' + product.image],
+                "description": product.description,
+                "sku": product.id,
+                "brand": { "@type": "Brand", "name": "Showlovein" },
+                "aggregateRating": {
+                    "@type": "AggregateRating",
+                    "ratingValue": avg.toFixed(1),
+                    "reviewCount": _productReviews.length || 1
+                },
+                "offers": {
+                    "@type": "Offer",
+                    "url": window.location.href,
+                    "priceCurrency": "USD",
+                    "price": parseFloat(product.price).toFixed(2),
+                    "availability": "https://schema.org/InStock"
+                }
+            };
+            const script = document.createElement('script');
+            script.type = 'application/ld+json';
+            script.text = JSON.stringify(jsonLd);
+            document.head.appendChild(script);
         }
 
         function selectVariant(name, value, btn) {
